@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Polyamory Bible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE4D3;
+    --page:#E3D5BE;
+    --page-edge:#D8C6A8;
+    --ink:#3A2E22;
+    --ink-faded:#6B5844;
+    --oxblood:#8A3324;
+    --gilt:#B08D57;
+    --shadow:rgba(58,46,34,.28);
+    --display:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --body:"EB Garamond", Georgia, "Times New Roman", serif;
+  }
+
+  *{box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, #F2EADb 0%, var(--paper) 55%, #E4D8C0 100%) fixed;
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:19px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{
+    max-width:860px;
+    margin:0 auto;
+    padding:48px 24px 80px;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead{text-align:center; margin-bottom:34px;}
+  .ornament{
+    color:var(--gilt);
+    letter-spacing:.5em;
+    font-size:18px;
+    margin-bottom:12px;
+    user-select:none;
+  }
+  .masthead h1{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(44px,9vw,82px);
+    line-height:.96;
+    margin:0;
+    letter-spacing:.01em;
+  }
+  .masthead h1 .the{
+    display:block;
+    font-size:.34em;
+    letter-spacing:.42em;
+    text-transform:uppercase;
+    color:var(--oxblood);
+    font-weight:600;
+    margin-bottom:.18em;
+  }
+  .masthead .epigraph{
+    font-style:italic;
+    color:var(--ink-faded);
+    font-size:21px;
+    margin:18px auto 0;
+    max-width:42ch;
+  }
+  .rule{
+    border:0;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--gilt) 22%, var(--gilt) 78%, transparent);
+    margin:30px auto;
+    max-width:340px;
+  }
+
+  /* ---------- Chapter thumb-tabs ---------- */
+  .tabs-frame{position:relative;}
+  .tabs-scroll-hint{
+    position:absolute; top:0; bottom:14px; width:34px; pointer-events:none; z-index:2;
+  }
+  .tabs-scroll-hint.left{left:0; background:linear-gradient(90deg, var(--paper), transparent);}
+  .tabs-scroll-hint.right{right:0; background:linear-gradient(270deg, var(--paper), transparent);}
+  .tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding:0 4px 14px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--gilt) transparent;
+  }
+  .tabs::-webkit-scrollbar{height:6px;}
+  .tabs::-webkit-scrollbar-thumb{background:var(--gilt); border-radius:6px;}
+  .tab{
+    flex:0 0 auto;
+    min-width:96px;
+    max-width:140px;
+    border:none;
+    cursor:pointer;
+    background:linear-gradient(180deg, #DCCBAC, #CDB991);
+    color:var(--ink-faded);
+    border-radius:8px 8px 2px 2px;
+    padding:10px 12px 12px;
+    text-align:center;
+    font-family:var(--body);
+    box-shadow:inset 0 -3px 0 rgba(58,46,34,.12);
+    transition:transform .18s ease, background .18s ease, color .18s ease;
+    position:relative;
+    top:6px;
+  }
+  .tab:hover{transform:translateY(-3px);}
+  .tab .num{
+    display:block;
+    font-family:var(--display);
+    font-size:26px;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:.04em;
+  }
+  .tab .mini-title{
+    display:block;
+    font-size:12.5px;
+    line-height:1.18;
+    margin-top:4px;
+    font-style:italic;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+  .tab[aria-selected="true"]{
+    background:var(--page);
+    color:var(--oxblood);
+    top:0;
+    box-shadow:0 -2px 6px var(--shadow);
+  }
+  .tab[aria-selected="true"] .mini-title{color:var(--ink);}
+
+  /* ---------- The page (nested scroll frame) ---------- */
+  .book{
+    background:var(--page);
+    border:1px solid var(--page-edge);
+    border-radius:2px 2px 6px 6px;
+    box-shadow:0 18px 40px -18px var(--shadow), 0 2px 0 var(--page-edge);
+    position:relative;
+    overflow:hidden;
+  }
+  /* gilded inner edge + faint paper grain */
+  .book::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    box-shadow:inset 0 0 0 1px rgba(176,141,87,.35), inset 0 0 60px rgba(58,46,34,.06);
+    background-image:radial-gradient(rgba(58,46,34,.025) 1px, transparent 1px);
+    background-size:4px 4px;
+    z-index:1;
+  }
+  .page-head{
+    padding:30px 40px 18px;
+    border-bottom:1px solid rgba(176,141,87,.4);
+    position:relative; z-index:2;
+  }
+  .page-head .chap-num{
+    font-family:var(--display);
+    text-transform:uppercase;
+    letter-spacing:.42em;
+    font-size:14px;
+    color:var(--oxblood);
+    margin:0 0 6px;
+  }
+  .page-head h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(30px,5.5vw,46px);
+    line-height:1.02;
+    margin:0;
+  }
+  .page-head .chap-epigraph{
+    font-style:italic;
+    color:var(--ink-faded);
+    margin:12px 0 0;
+    font-size:18px;
+  }
+
+  /* scrollable body — nested within the page */
+  .page-body{
+    height:56vh;
+    min-height:320px;
+    overflow-y:auto;
+    padding:26px 40px 34px;
+    position:relative; z-index:2;
+    scrollbar-width:thin;
+    scrollbar-color:var(--gilt) transparent;
+    -webkit-overflow-scrolling:touch;
+  }
+  .page-body::-webkit-scrollbar{width:9px;}
+  .page-body::-webkit-scrollbar-track{background:rgba(176,141,87,.12);}
+  .page-body::-webkit-scrollbar-thumb{background:var(--gilt); border-radius:9px; border:2px solid var(--page);}
+  .page-body p{margin:0 0 1.05em; text-align:justify; hyphens:auto;}
+  .page-body p:first-of-type::first-letter{
+    font-family:var(--display);
+    float:left;
+    font-size:64px;
+    line-height:.78;
+    padding:6px 10px 0 0;
+    color:var(--oxblood);
+    font-weight:600;
+  }
+
+  .divider{
+    text-align:center;
+    color:var(--gilt);
+    letter-spacing:.6em;
+    margin:30px 0 18px;
+    user-select:none;
+    font-size:18px;
+  }
+  .commentary-invite{
+    text-align:center;
+    font-style:italic;
+    color:var(--ink-faded);
+    margin-bottom:6px;
+  }
+  .commentary-link{
+    display:inline-block;
+    margin-top:4px;
+    color:var(--oxblood);
+    text-decoration:none;
+    border-bottom:1px solid var(--oxblood);
+    padding-bottom:1px;
+    font-style:italic;
+    font-size:19px;
+    background:none; border-top:none; border-left:none; border-right:none; cursor:pointer;
+    font-family:var(--body);
+  }
+  .commentary-link:hover{color:var(--ink); border-color:var(--ink);}
+  .commentary-count{font-style:normal; color:var(--gilt); font-size:15px;}
+
+  /* prev / next */
+  .page-foot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:14px;
+    padding:16px 40px 22px;
+    border-top:1px solid rgba(176,141,87,.4);
+    position:relative; z-index:2;
+    background:linear-gradient(180deg, transparent, rgba(176,141,87,.08));
+  }
+  .nav-arrow{
+    background:none; border:none; cursor:pointer;
+    font-family:var(--body); font-size:18px; color:var(--ink);
+    display:flex; flex-direction:column; line-height:1.1; padding:6px 4px;
+    max-width:44%;
+  }
+  .nav-arrow:disabled{opacity:.3; cursor:default;}
+  .nav-arrow .label{font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faded);}
+  .nav-arrow .ttl{font-style:italic; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .nav-arrow.next{text-align:right; align-items:flex-end;}
+  .nav-arrow.prev{text-align:left; align-items:flex-start;}
+  .nav-arrow .glyph{color:var(--oxblood); font-size:21px;}
+
+  /* ---------- below-the-book actions ---------- */
+  .colophon{margin-top:46px; text-align:center;}
+  .actions{
+    display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-bottom:30px;
+  }
+  .btn{
+    font-family:var(--body);
+    font-size:18px;
+    cursor:pointer;
+    padding:12px 24px;
+    border-radius:3px;
+    transition:transform .15s ease, background .15s ease, color .15s ease;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--oxblood); color:#F3E9D6; border:1px solid var(--oxblood);}
+  .btn-primary:hover{background:#722616;}
+  .btn-outline{background:transparent; color:var(--ink); border:1px solid var(--gilt);}
+  .btn-outline:hover{background:rgba(176,141,87,.18);}
+
+  .subscribe-row{
+    border-top:1px solid rgba(176,141,87,.5);
+    padding-top:28px;
+    margin-top:8px;
+  }
+  .subscribe-row p{font-style:italic; color:var(--ink-faded); margin:0 0 14px;}
+  .footer-note{
+    margin-top:40px;
+    font-size:14px;
+    color:var(--ink-faded);
+    letter-spacing:.04em;
+  }
+  .footer-note .ornament{font-size:14px; margin-bottom:8px;}
+
+  /* ---------- modals ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(40,30,20,.55);
+    backdrop-filter:blur(2px);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 18px;
+    overflow-y:auto;
+    z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .slip{
+    background:
+      linear-gradient(180deg,#F4ECD8,#EDE2C9);
+    width:100%;
+    max-width:560px;
+    border:1px solid var(--page-edge);
+    border-radius:3px;
+    box-shadow:0 30px 60px -20px rgba(40,30,20,.6);
+    padding:34px 34px 30px;
+    position:relative;
+    margin:auto 0;
+  }
+  .slip h3{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:34px;
+    margin:0 0 4px;
+    line-height:1.04;
+  }
+  .slip .sub{font-style:italic; color:var(--ink-faded); margin:0 0 22px; font-size:17px;}
+  .close{
+    position:absolute; top:14px; right:16px;
+    background:none; border:none; cursor:pointer;
+    font-size:26px; color:var(--ink-faded); line-height:1;
+    font-family:var(--body);
+  }
+  .close:hover{color:var(--oxblood);}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block; font-size:13px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink-faded); margin-bottom:6px;
+  }
+  .field input, .field textarea{
+    width:100%; font-family:var(--body); font-size:17px; color:var(--ink);
+    background:rgba(255,255,255,.45);
+    border:1px solid var(--page-edge);
+    border-radius:3px; padding:10px 12px; resize:vertical;
+  }
+  .field input:focus, .field textarea:focus{outline:2px solid var(--gilt); outline-offset:1px; border-color:var(--gilt);}
+  .field textarea{min-height:120px;}
+  .form-actions{display:flex; gap:10px; align-items:center; margin-top:8px;}
+  .confirm-msg{color:var(--oxblood); font-style:italic; font-size:16px;}
+
+  /* existing commentary list */
+  .notes{margin:4px 0 22px; max-height:230px; overflow-y:auto; padding-right:6px;}
+  .note{
+    border-left:3px solid var(--gilt);
+    padding:6px 0 6px 14px;
+    margin-bottom:14px;
+  }
+  .note .who{font-style:italic; color:var(--oxblood); font-size:15px;}
+  .note .txt{margin:2px 0 0; font-size:17px;}
+  .notes-empty{font-style:italic; color:var(--ink-faded); margin:2px 0 18px;}
+
+  :focus-visible{outline:2px solid var(--oxblood); outline-offset:2px;}
+
+  @media (max-width:560px){
+    body{font-size:18px;}
+    .wrap{padding:30px 14px 60px;}
+    .page-head,.page-body,.page-foot{padding-left:22px; padding-right:22px;}
+    .page-body{height:62vh;}
+    .nav-arrow .ttl{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="ornament" aria-hidden="true">❦ &nbsp; ❦ &nbsp; ❦</div>
+    <h1><span class="the">The</span>Polyamory Bible</h1>
+    <p class="epigraph">A living book of the thornier truths &mdash; the lessons that arrive late, and the questions no one warns you about.</p>
+    <hr class="rule">
+  </header>
+
+  <div class="tabs-frame">
+    <div class="tabs-scroll-hint left" aria-hidden="true"></div>
+    <div class="tabs-scroll-hint right" aria-hidden="true"></div>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Chapters"></div>
+  </div>
+
+  <main class="book" aria-live="polite">
+    <div class="page-head">
+      <p class="chap-num" id="chapNum"></p>
+      <h2 id="chapTitle"></h2>
+      <p class="chap-epigraph" id="chapEpigraph"></p>
+    </div>
+    <div class="page-body" id="chapBody" tabindex="0" role="tabpanel" aria-label="Chapter text"></div>
+    <div class="page-foot">
+      <button class="nav-arrow prev" id="prevBtn">
+        <span class="label"><span class="glyph">‹</span> Previous</span>
+        <span class="ttl" id="prevTtl"></span>
+      </button>
+      <button class="nav-arrow next" id="nextBtn">
+        <span class="label">Next <span class="glyph">›</span></span>
+        <span class="ttl" id="nextTtl"></span>
+      </button>
+    </div>
+  </main>
+
+  <section class="colophon">
+    <div class="actions">
+      <button class="btn btn-primary" id="proposeBtn">Propose a Chapter</button>
+      <button class="btn btn-outline" id="feedbackBtn">General Feedback</button>
+    </div>
+    <div class="subscribe-row">
+      <p>New chapters, marginalia, and dispatches from the road.</p>
+      <a class="btn btn-primary" id="subscribeBtn" href="https://YOUR-SUBSTACK.substack.com" target="_blank" rel="noopener">Subscribe on Substack</a>
+    </div>
+    <div class="footer-note">
+      <div class="ornament" aria-hidden="true">❦</div>
+      An unfinished book, written in the margins by the people living it.
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ Commentary modal ============ -->
+<div class="overlay" id="commentOverlay">
+  <div class="slip" role="dialog" aria-modal="true" aria-labelledby="commentHeading">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h3 id="commentHeading">Marginalia</h3>
+    <p class="sub" id="commentSub"></p>
+    <div class="notes" id="notesList"></div>
+    <hr class="rule" style="margin:18px auto;">
+    <div class="field">
+      <label for="cName">Your name <span style="text-transform:none;letter-spacing:0;">(or a pen name)</span></label>
+      <input id="cName" type="text" placeholder="Anonymous reader" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="cText">Your note in the margin</label>
+      <textarea id="cText" placeholder="What did this chapter get right, miss, or stir up for you?"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="cSubmit">Add to the margin</button>
+      <span class="confirm-msg" id="cConfirm"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Propose a chapter modal ============ -->
+<div class="overlay" id="proposeOverlay">
+  <div class="slip" role="dialog" aria-modal="true" aria-labelledby="proposeHeading">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h3 id="proposeHeading">Propose a Chapter</h3>
+    <p class="sub">A fully written chapter, or just the seed of one &mdash; both are welcome.</p>
+    <div class="field">
+      <label for="pName">Name</label>
+      <input id="pName" type="text" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="pEmail">Email</label>
+      <input id="pEmail" type="email" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="pText">Your chapter, or the idea for one</label>
+      <textarea id="pText" placeholder="Title, theme, a draft, a hard-won lesson — whatever you have."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="pSubmit">Submit proposal</button>
+      <span class="confirm-msg" id="pConfirm"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ General feedback modal ============ -->
+<div class="overlay" id="feedbackOverlay">
+  <div class="slip" role="dialog" aria-modal="true" aria-labelledby="feedbackHeading">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h3 id="feedbackHeading">General Feedback</h3>
+    <p class="sub">Questions, corrections, or anything you'd like to send the editors.</p>
+    <div class="field">
+      <label for="fName">Name</label>
+      <input id="fName" type="text" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="fEmail">Email</label>
+      <input id="fEmail" type="email" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="fText">Message</label>
+      <textarea id="fText"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="fSubmit">Send</button>
+      <span class="confirm-msg" id="fConfirm"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   THE POLYAMORY BIBLE — front-end logic
+   ------------------------------------------------------------
+   Commentary persists via the artifact storage API when available
+   (shared so notes are communal), and falls back to in-memory
+   when hosted elsewhere. Chapter proposals and general feedback
+   currently just confirm receipt — wire SUBMIT_ENDPOINT below to
+   a real form service (Formspree, Google Forms, your own API…)
+   when you're ready to collect them. Replace YOUR-SUBSTACK above
+   with your real Substack URL.
+   ============================================================ */
+
+const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+
+// A reusable block of Lorem Ipsum (placeholder copy).
+const L = [
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  "Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.",
+  "Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis, id tincidunt sapien risus a quam. Maecenas fermentum consequat mi.",
+  "Donec fermentum. Pellentesque malesuada nulla a mi. Duis sapien sem, aliquet nec, commodo eget, consequat quis, neque. Aliquam faucibus, elit ut dictum aliquet, felis nisl adipiscing sapien, sed malesuada diam lacus eget erat.",
+  "Cras mollis scelerisque nunc. Nullam arcu. Aliquam consequat. Curabitur augue lorem, dapibus quis, laoreet et, pretium ac, nisi. Aenean magna nisl, mollis quis, molestie eu, feugiat in, orci. In hac habitasse platea dictumst.",
+  "Vivamus euismod mauris. In ut quam vitae odio lacinia tincidunt. Praesent ut ligula non mi varius sagittis. Cras sagittis. Praesent ac sem eget est egestas volutpat. Vivamus consectetuer hendrerit lacus."
+];
+
+function loremParas(n){
+  let out = [];
+  for(let i=0;i<n;i++){ out.push(L[i % L.length] + " " + L[(i+3) % L.length]); }
+  return out;
+}
+
+const CHAPTERS = [
+  {t:"On the Architecture of Jealousy",
+   e:"In which the oldest feeling is dismantled, and found to be load-bearing."},
+  {t:"The Myth of the Spare Heart",
+   e:"On the lie that love divides rather than multiplies — and where the lie hides truth."},
+  {t:"Calendars, and Other Instruments of Devotion",
+   e:"In which logistics are revealed to be a language of care."},
+  {t:"The Grammar of Disclosure",
+   e:"What to tell, to whom, and the difference between honesty and unloading."},
+  {t:"Compersion and Its Discontents",
+   e:"On the joy you are supposed to feel, and what to do when it is late."},
+  {t:"The Question of Hierarchy",
+   e:"Primary, secondary, and the quiet violence of ranking the people you love."},
+  {t:"When Metamours Become Mirrors",
+   e:"On the strangers your partners love, and what they show you about yourself."},
+  {t:"The Economy of Time and Attention",
+   e:"In which the scarcest resource turns out not to be love."},
+  {t:"Endings Without Villains",
+   e:"On breakups that aren't failures, and the grief that has no name."},
+  {t:"The Self You Bring to the Table",
+   e:"The last chapter, and the first: the work that was always yours alone."}
+];
+
+// attach lorem bodies
+CHAPTERS.forEach((c,i)=>{ c.body = loremParas(7 + (i % 3)); });
+
+let current = 0;
+
+/* ---------- storage abstraction ---------- */
+const mem = {};
+const store = {
+  async get(key){
+    try{
+      if(window.storage){ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }
+    }catch(e){ /* fall through */ }
+    return mem[key] || null;
+  },
+  async set(key, val){
+    try{
+      if(window.storage){ await window.storage.set(key, JSON.stringify(val), true); return; }
+    }catch(e){ /* fall through */ }
+    mem[key] = val;
+  }
+};
+const commentKey = (i)=> "comments:chapter:" + (i+1);
+
+/* ---------- render tabs ---------- */
+const tabsEl = document.getElementById("tabs");
+CHAPTERS.forEach((c,i)=>{
+  const b = document.createElement("button");
+  b.className = "tab";
+  b.setAttribute("role","tab");
+  b.setAttribute("aria-selected", i===0 ? "true":"false");
+  b.innerHTML = '<span class="num">'+ROMAN[i]+'</span><span class="mini-title">'+c.t+'</span>';
+  b.addEventListener("click", ()=> openChapter(i, true));
+  tabsEl.appendChild(b);
+});
+
+/* ---------- render a chapter ---------- */
+async function openChapter(i, scrollTabIntoView){
+  current = i;
+  const c = CHAPTERS[i];
+
+  document.querySelectorAll(".tab").forEach((t,idx)=> t.setAttribute("aria-selected", idx===i ? "true":"false"));
+
+  document.getElementById("chapNum").textContent = "Chapter " + ROMAN[i];
+  document.getElementById("chapTitle").textContent = c.t;
+  document.getElementById("chapEpigraph").textContent = c.e;
+
+  const counts = await getCount(i);
+  const bodyEl = document.getElementById("chapBody");
+  bodyEl.innerHTML =
+    c.body.map(p=>"<p>"+p+"</p>").join("") +
+    '<div class="divider" aria-hidden="true">❧</div>' +
+    '<p class="commentary-invite">The margins of this chapter are open.</p>' +
+    '<p style="text-align:center;margin-top:2px;">' +
+      '<button class="commentary-link" id="inlineComment">Add your commentary to Chapter '+ROMAN[i]+
+      ' <span class="commentary-count" id="inlineCount">'+(counts? "· "+counts+" note"+(counts===1?"":"s"):"")+'</span></button>' +
+    '</p>';
+  bodyEl.scrollTop = 0;
+  document.getElementById("inlineComment").addEventListener("click", ()=> openComments(i));
+
+  // prev / next
+  const prev = document.getElementById("prevBtn");
+  const next = document.getElementById("nextBtn");
+  prev.disabled = (i===0);
+  next.disabled = (i===CHAPTERS.length-1);
+  document.getElementById("prevTtl").textContent = i>0 ? CHAPTERS[i-1].t : "";
+  document.getElementById("nextTtl").textContent = i<CHAPTERS.length-1 ? CHAPTERS[i+1].t : "";
+
+  if(scrollTabIntoView){
+    const activeTab = document.querySelectorAll(".tab")[i];
+    if(activeTab) activeTab.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
+  }
+}
+
+document.getElementById("prevBtn").addEventListener("click", ()=>{ if(current>0) openChapter(current-1, true); });
+document.getElementById("nextBtn").addEventListener("click", ()=>{ if(current<CHAPTERS.length-1) openChapter(current+1, true); });
+
+/* ---------- commentary ---------- */
+async function getCount(i){
+  const list = await store.get(commentKey(i));
+  return list ? list.length : 0;
+}
+
+async function openComments(i){
+  current = i;
+  document.getElementById("commentSub").textContent = "Chapter " + ROMAN[i] + " — " + CHAPTERS[i].t;
+  document.getElementById("cConfirm").textContent = "";
+  await renderNotes(i);
+  showOverlay("commentOverlay");
+  document.getElementById("cName").focus();
+}
+
+async function renderNotes(i){
+  const list = await store.get(commentKey(i)) || [];
+  const wrap = document.getElementById("notesList");
+  if(!list.length){
+    wrap.innerHTML = '<p class="notes-empty">No marginalia yet. Be the first to write in the margin.</p>';
+    return;
+  }
+  wrap.innerHTML = list.slice().reverse().map(n=>
+    '<div class="note"><div class="who">'+escapeHtml(n.name)+'</div><p class="txt">'+escapeHtml(n.text)+'</p></div>'
+  ).join("");
+}
+
+document.getElementById("cSubmit").addEventListener("click", async ()=>{
+  const text = document.getElementById("cText").value.trim();
+  if(!text){ document.getElementById("cConfirm").textContent = "Write a note first."; return; }
+  const name = document.getElementById("cName").value.trim() || "Anonymous reader";
+  const list = await store.get(commentKey(current)) || [];
+  list.push({name, text, at: Date.now()});
+  await store.set(commentKey(current), list);
+  document.getElementById("cText").value = "";
+  document.getElementById("cName").value = "";
+  document.getElementById("cConfirm").textContent = "Added to the margin. Thank you.";
+  await renderNotes(current);
+  const cnt = list.length;
+  const inlineCount = document.getElementById("inlineCount");
+  if(inlineCount) inlineCount.textContent = "· "+cnt+" note"+(cnt===1?"":"s");
+});
+
+/* ---------- propose a chapter ---------- */
+document.getElementById("proposeBtn").addEventListener("click", ()=>{
+  document.getElementById("pConfirm").textContent = "";
+  showOverlay("proposeOverlay");
+});
+document.getElementById("pSubmit").addEventListener("click", ()=>{
+  const name = document.getElementById("pName").value.trim();
+  const email = document.getElementById("pEmail").value.trim();
+  const text = document.getElementById("pText").value.trim();
+  if(!text){ document.getElementById("pConfirm").textContent = "Add a chapter or an idea first."; return; }
+  // TODO: send {name,email,text} to your real endpoint here.
+  console.log("Chapter proposal:", {name, email, text});
+  document.getElementById("pConfirm").textContent = "Received — thank you for the offering.";
+  document.getElementById("pText").value="";
+});
+
+/* ---------- general feedback ---------- */
+document.getElementById("feedbackBtn").addEventListener("click", ()=>{
+  document.getElementById("fConfirm").textContent = "";
+  showOverlay("feedbackOverlay");
+});
+document.getElementById("fSubmit").addEventListener("click", ()=>{
+  const name = document.getElementById("fName").value.trim();
+  const email = document.getElementById("fEmail").value.trim();
+  const text = document.getElementById("fText").value.trim();
+  if(!text){ document.getElementById("fConfirm").textContent = "Add a message first."; return; }
+  // TODO: send {name,email,text} to your real endpoint here.
+  console.log("General feedback:", {name, email, text});
+  document.getElementById("fConfirm").textContent = "Sent. We read everything.";
+  document.getElementById("fText").value="";
+});
+
+/* ---------- overlay plumbing ---------- */
+function showOverlay(id){ document.getElementById(id).classList.add("open"); document.body.style.overflow="hidden"; }
+function hideOverlays(){ document.querySelectorAll(".overlay").forEach(o=>o.classList.remove("open")); document.body.style.overflow=""; }
+document.querySelectorAll("[data-close]").forEach(b=> b.addEventListener("click", hideOverlays));
+document.querySelectorAll(".overlay").forEach(o=> o.addEventListener("click", e=>{ if(e.target===o) hideOverlays(); }));
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") hideOverlays(); });
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------- boot ---------- */
+openChapter(0, false);
+</script>
+</body>
+</html>
