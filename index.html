@@ -102,14 +102,14 @@
   .tabs::-webkit-scrollbar-thumb{background:var(--gilt); border-radius:6px;}
   .tab{
     flex:0 0 auto;
-    min-width:96px;
-    max-width:140px;
+    min-width:56px;
+    max-width:80px;
     border:none;
     cursor:pointer;
     background:linear-gradient(180deg, #DCCBAC, #CDB991);
     color:var(--ink-faded);
     border-radius:8px 8px 2px 2px;
-    padding:10px 12px 12px;
+    padding:10px 12px;
     text-align:center;
     font-family:var(--body);
     box-shadow:inset 0 -3px 0 rgba(58,46,34,.12);
@@ -126,25 +126,37 @@
     line-height:1;
     letter-spacing:.04em;
   }
-  .tab .mini-title{
-    display:block;
-    font-size:12.5px;
-    line-height:1.18;
-    margin-top:4px;
-    font-style:italic;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-  }
   .tab[aria-selected="true"]{
     background:var(--page);
     color:var(--oxblood);
     top:0;
     box-shadow:0 -2px 6px var(--shadow);
   }
-  .tab[aria-selected="true"] .mini-title{color:var(--ink);}
+
+  /* ---------- Page-turn animation ---------- */
+  .book{ perspective: 2200px; }
+  .page-flip{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    background:linear-gradient(160deg,#F4ECD8 0%,#EDE2C9 55%,#E3D5BE 100%);
+    box-shadow:inset 0 0 0 1px rgba(176,141,87,.28), inset 0 0 50px rgba(58,46,34,.05);
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  }
+  .page-flip.turning-next{
+    transform-origin:left center;
+    animation:pageFlipNext .52s cubic-bezier(.4,0,.25,1) forwards;
+  }
+  .page-flip.turning-prev{
+    transform-origin:right center;
+    animation:pageFlipPrev .52s cubic-bezier(.4,0,.25,1) forwards;
+  }
+  @keyframes pageFlipNext{
+    0%  {transform:rotateY(0deg);   box-shadow:inset 0 0 0 1px rgba(176,141,87,.28),-14px 0 28px -8px rgba(58,46,34,.28);}
+    100%{transform:rotateY(-180deg);box-shadow:none;}
+  }
+  @keyframes pageFlipPrev{
+    0%  {transform:rotateY(0deg);   box-shadow:inset 0 0 0 1px rgba(176,141,87,.28), 14px 0 28px -8px rgba(58,46,34,.28);}
+    100%{transform:rotateY(180deg); box-shadow:none;}
+  }
 
   /* ---------- The page (nested scroll frame) ---------- */
   .book{
@@ -261,14 +273,22 @@
     background:none; border:none; cursor:pointer;
     font-family:var(--body); font-size:18px; color:var(--ink);
     display:flex; flex-direction:column; line-height:1.1; padding:6px 4px;
-    max-width:44%;
   }
   .nav-arrow:disabled{opacity:.3; cursor:default;}
   .nav-arrow .label{font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faded);}
-  .nav-arrow .ttl{font-style:italic; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .nav-arrow.next{text-align:right; align-items:flex-end;}
   .nav-arrow.prev{text-align:left; align-items:flex-start;}
   .nav-arrow .glyph{color:var(--oxblood); font-size:21px;}
+
+  .foot-comment{flex:1; text-align:center;}
+  .foot-comment-btn{
+    background:none; border:none; cursor:pointer;
+    font-family:var(--body); font-style:italic; font-size:16px;
+    color:var(--ink-faded); padding:4px 10px;
+    transition:color .15s;
+  }
+  .foot-comment-btn:hover{color:var(--oxblood);}
+  .foot-comment-btn .count{font-style:normal; color:var(--gilt); font-size:14px;}
 
   /* ---------- below-the-book actions ---------- */
   .colophon{margin-top:46px; text-align:center;}
@@ -382,7 +402,7 @@
     .nav-arrow .ttl{display:none;}
   }
   @media (prefers-reduced-motion:reduce){
-    *{transition:none !important; scroll-behavior:auto !important;}
+    *{transition:none !important; animation:none !important; scroll-behavior:auto !important;}
   }
 </style>
 </head>
@@ -412,11 +432,10 @@
     <div class="page-foot">
       <button class="nav-arrow prev" id="prevBtn">
         <span class="label"><span class="glyph">‹</span> Previous</span>
-        <span class="ttl" id="prevTtl"></span>
       </button>
+      <div class="foot-comment" id="footComment"></div>
       <button class="nav-arrow next" id="nextBtn">
         <span class="label">Next <span class="glyph">›</span></span>
-        <span class="ttl" id="nextTtl"></span>
       </button>
     </div>
   </main>
@@ -596,8 +615,9 @@ CHAPTERS.forEach((c,i)=>{
   b.className = "tab";
   b.setAttribute("role","tab");
   b.setAttribute("aria-selected", i===0 ? "true":"false");
-  b.innerHTML = '<span class="num">'+ROMAN[i]+'</span><span class="mini-title">'+c.t+'</span>';
-  b.addEventListener("click", ()=> openChapter(i, true));
+  b.innerHTML = '<span class="num">'+ROMAN[i]+'</span>';
+  b.setAttribute("title", c.t);
+  b.addEventListener("click", ()=> turnPage(i));
   tabsEl.appendChild(b);
 });
 
@@ -614,24 +634,22 @@ async function openChapter(i, scrollTabIntoView){
 
   const counts = await getCount(i);
   const bodyEl = document.getElementById("chapBody");
-  bodyEl.innerHTML =
-    c.body.map(p=>"<p>"+p+"</p>").join("") +
-    '<div class="divider" aria-hidden="true">❧</div>' +
-    '<p class="commentary-invite">The margins of this chapter are open.</p>' +
-    '<p style="text-align:center;margin-top:2px;">' +
-      '<button class="commentary-link" id="inlineComment">Add your commentary to Chapter '+ROMAN[i]+
-      ' <span class="commentary-count" id="inlineCount">'+(counts? "· "+counts+" note"+(counts===1?"":"s"):"")+'</span></button>' +
-    '</p>';
+  bodyEl.innerHTML = c.body.map(p=>"<p>"+p+"</p>").join("");
   bodyEl.scrollTop = 0;
-  document.getElementById("inlineComment").addEventListener("click", ()=> openComments(i));
+
+  // commentary button in footer
+  const footComment = document.getElementById("footComment");
+  footComment.innerHTML =
+    '<button class="foot-comment-btn" id="footCommentBtn">Marginalia' +
+    (counts ? ' <span class="count">· '+counts+' note'+(counts===1?'':'s')+'</span>' : '') +
+    '</button>';
+  document.getElementById("footCommentBtn").addEventListener("click", ()=> openComments(i));
 
   // prev / next
   const prev = document.getElementById("prevBtn");
   const next = document.getElementById("nextBtn");
   prev.disabled = (i===0);
   next.disabled = (i===CHAPTERS.length-1);
-  document.getElementById("prevTtl").textContent = i>0 ? CHAPTERS[i-1].t : "";
-  document.getElementById("nextTtl").textContent = i<CHAPTERS.length-1 ? CHAPTERS[i+1].t : "";
 
   if(scrollTabIntoView){
     const activeTab = document.querySelectorAll(".tab")[i];
@@ -639,8 +657,33 @@ async function openChapter(i, scrollTabIntoView){
   }
 }
 
-document.getElementById("prevBtn").addEventListener("click", ()=>{ if(current>0) openChapter(current-1, true); });
-document.getElementById("nextBtn").addEventListener("click", ()=>{ if(current<CHAPTERS.length-1) openChapter(current+1, true); });
+/* ---------- page-turn ---------- */
+let _turning = false;
+
+async function turnPage(nextIdx){
+  if(_turning || nextIdx === current) return;
+  if(nextIdx < 0 || nextIdx >= CHAPTERS.length) return;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){ await openChapter(nextIdx, true); return; }
+
+  _turning = true;
+  const dir = nextIdx > current ? 'next' : 'prev';
+
+  const flip = document.createElement('div');
+  flip.className = 'page-flip';
+  document.querySelector('.book').appendChild(flip);
+
+  await openChapter(nextIdx, true);
+
+  void flip.offsetWidth; // force reflow so animation starts fresh
+  flip.classList.add('turning-' + dir);
+
+  flip.addEventListener('animationend', ()=>{ flip.remove(); _turning = false; }, {once:true});
+}
+
+document.getElementById("prevBtn").addEventListener("click", ()=> turnPage(current - 1));
+document.getElementById("nextBtn").addEventListener("click", ()=> turnPage(current + 1));
 
 /* ---------- commentary ---------- */
 async function getCount(i){
@@ -681,8 +724,8 @@ document.getElementById("cSubmit").addEventListener("click", async ()=>{
   document.getElementById("cConfirm").textContent = "Added to the margin. Thank you.";
   await renderNotes(current);
   const cnt = list.length;
-  const inlineCount = document.getElementById("inlineCount");
-  if(inlineCount) inlineCount.textContent = "· "+cnt+" note"+(cnt===1?"":"s");
+  const footCommentBtn = document.getElementById("footCommentBtn");
+  if(footCommentBtn) footCommentBtn.innerHTML = 'Marginalia <span class="count">· '+cnt+' note'+(cnt===1?'':'s')+'</span>';
 });
 
 /* ---------- propose a chapter ---------- */
